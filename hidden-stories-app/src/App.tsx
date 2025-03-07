@@ -38,44 +38,42 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-zinc-100 p-4 md:p-8">
+    <div className="container min-vh-100 bg-dark text-light p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <header className="mb-8 text-center">
-          <h1 className="text-3xl md:text-4xl font-light text-zinc-100 mb-2 tracking-tight">
-            EchoGo
-          </h1>
-          <p className="text-zinc-400 max-w-2xl mx-auto text-sm font-mono">
-            location-based stories and music // powered by AI
-          </p>
+          <h1 className="display-4 mb-2">Hidden Stories</h1>
+          <p className="text-muted">location-based stories and music // powered by AI</p>
         </header>
 
         {/* Location Section */}
-        <div className="bg-zinc-800 border border-zinc-700 rounded mb-8">
-          <div className="p-3 border-b border-zinc-700 text-center">
-            <h2 className="text-sm font-mono text-zinc-300 uppercase tracking-wider">Location</h2>
+        <div className="card bg-secondary mb-8">
+          <div className="card-header text-center">
+            <h2 className="h5">Location</h2>
           </div>
-          <div className="p-4">
+          <div className="card-body">
             <MapSelector onLocationSelect={handleLocationSelect} />
           </div>
         </div>
 
         {/* Loading State */}
         {isLoading && (
-          <div className="bg-zinc-800 border border-zinc-700 rounded mb-8 p-8 text-center">
-            <div className="animate-pulse h-4 w-32 bg-zinc-700 mx-auto mb-4"></div>
-            <p className="text-zinc-400 text-sm font-mono">processing...</p>
+          <div className="card bg-secondary mb-8 text-center p-8">
+            <div className="spinner-border text-light mb-4" role="status">
+              <span className="sr-only">Loading...</span>
+            </div>
+            <p className="text-muted">processing...</p>
           </div>
         )}
 
         {/* Story Section */}
         {story && !isLoading && (
-          <div className="bg-zinc-800 border border-zinc-700 rounded mb-8">
-            <div className="p-3 border-b border-zinc-700 text-center">
-              <h2 className="text-sm font-mono text-zinc-300 uppercase tracking-wider">Story</h2>
+          <div className="card bg-secondary mb-8">
+            <div className="card-header text-center">
+              <h2 className="h5">Story</h2>
             </div>
-            <div className="p-6 text-center">
-              <p className="text-zinc-300 font-light mb-4">{story}</p>
+            <div className="card-body text-center">
+              <p className="mb-4">{story}</p>
               <StoryReader story={story} />
             </div>
           </div>
@@ -83,26 +81,22 @@ const App: React.FC = () => {
 
         {/* Music Section */}
         {music && music.videoId && !isLoading && (
-          <div className="bg-zinc-800 border border-zinc-700 rounded mb-8">
-            <div className="p-3 border-b border-zinc-700 text-center">
-              <h2 className="text-sm font-mono text-zinc-300 uppercase tracking-wider">Music</h2>
+          <div className="card bg-secondary mb-8">
+            <div className="card-header text-center">
+              <h2 className="h5">Music</h2>
             </div>
-            <div className="p-6 text-center">
+            <div className="card-body text-center">
               <YouTubePlayer videoId={music.videoId} theme={music.theme} />
               {music.searchQuery && (
-                <p className="text-xs text-zinc-500 mt-2 font-mono">
-                  query: {music.searchQuery}
-                </p>
+                <p className="text-muted mt-2">query: {music.searchQuery}</p>
               )}
             </div>
           </div>
         )}
 
         {/* Footer */}
-        <footer className="text-center text-zinc-600 text-xs mt-12 font-mono">
-          <p>
-            AI-driven location-based experience
-          </p>
+        <footer className="text-center text-muted mt-12">
+          <p>AI-driven location-based experience</p>
         </footer>
       </div>
     </div>

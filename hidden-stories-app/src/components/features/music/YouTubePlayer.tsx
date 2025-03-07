@@ -19,17 +19,17 @@ const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ videoId, theme }) => {
   // If no video ID is provided, show a message
   if (!videoId) {
     return (
-      <div className="mt-4 p-4 bg-zinc-800 border border-zinc-700 text-center">
-        <p className="text-zinc-500 font-mono text-xs">no music found for theme: {theme || 'unknown'}</p>
+      <div className="mt-4 p-4 bg-secondary text-center">
+        <p className="text-muted">no music found for theme: {theme || 'unknown'}</p>
       </div>
     );
   }
 
   return (
     <div className="mt-4">
-      <p className="text-zinc-400 text-xs font-mono mb-2 text-center">theme: {theme}</p>
-      <div className="overflow-hidden border border-zinc-700">
-        <div className="relative">
+      <p className="text-muted text-center mb-2">theme: {theme}</p>
+      <div className="overflow-hidden border">
+        <div className="position-relative">
           {/* YouTube iframe - hidden when in audio-only mode */}
           <iframe
             title="YouTube Player"
@@ -45,21 +45,21 @@ const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ videoId, theme }) => {
           
           {/* Audio-only overlay when in audio-only mode */}
           {isAudioOnly && (
-            <div className="absolute inset-0 bg-zinc-800 flex items-center justify-center">
-              <div className="text-zinc-400 text-center">
-                <p className="font-mono text-xs">audio playing: {theme}</p>
+            <div className="position-absolute top-0 start-0 end-0 bottom-0 bg-secondary d-flex align-items-center justify-content-center">
+              <div className="text-center">
+                <p className="text-muted">audio playing: {theme}</p>
               </div>
             </div>
           )}
         </div>
         
-        <div className="p-3 bg-zinc-800 border-t border-zinc-700 flex justify-between items-center">
-          <p className="text-xs text-zinc-500 font-mono text-center">
+        <div className="p-3 bg-secondary border-top d-flex justify-content-between align-items-center">
+          <p className="text-muted text-center">
             ai-selected music
           </p>
           <button 
             onClick={() => setIsAudioOnly(!isAudioOnly)}
-            className="text-xs px-3 py-1 border border-zinc-700 text-zinc-400 hover:bg-zinc-700/30 font-mono transition-colors"
+            className="btn btn-secondary"
           >
             {isAudioOnly ? 'SHOW VIDEO' : 'AUDIO ONLY'}
           </button>

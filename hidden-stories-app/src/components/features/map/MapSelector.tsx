@@ -5,14 +5,7 @@ import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 import { useGeolocation } from '../../../hooks/useGeolocation';
 
 // Utils
-import { getAddressFromCoordinates } from '../../../utils/geocoding';
-
-// Constants
-import { 
-  MAP_CONTAINER_STYLE, 
-  DEFAULT_CENTER, 
-  DARK_MAP_STYLES 
-} from '../../../constants/mapStyles';
+import { getAddressFromCoordinates, MAP_CONTAINER_STYLE, DEFAULT_CENTER, DARK_MAP_STYLES } from '../../../utils/utils';
 
 interface MapSelectorProps {
   onLocationSelect: (lat: number, lng: number, address?: string) => void;
@@ -25,14 +18,16 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelect }) => {
   const [selectedPosition, setSelectedPosition] = useState<google.maps.LatLngLiteral | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   
-  // Use custom geolocation hook
+  // Use custom geolocation hook with improved error handling
   const { 
     position: currentLocation, 
     error: locationError, 
     isLocating, 
-    getCurrentLocation 
+    getCurrentLocation,
+    isAppleDevice 
   } = useGeolocation({
-    autoLocateOnMount: true
+    autoLocateOnMount: true,
+    maxRetries: 2
   });
   
   // Initialize Google Maps with API key from environment variables
@@ -107,8 +102,8 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelect }) => {
   }, [selectedPosition]);
 
   return isLoaded ? (
-    <div className="w-full overflow-hidden">
-      <div className="relative">
+    <div className="w-100 overflow-hidden">
+      <div className="position-relative">
         <GoogleMap
           mapContainerStyle={MAP_CONTAINER_STYLE}
           center={selectedPosition || currentLocation || DEFAULT_CENTER}
@@ -141,31 +136,38 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelect }) => {
             />
           )}
         </GoogleMap>
-        <button 
-          onClick={handleGetCurrentLocation}
-          className="absolute top-4 right-4 bg-zinc-800 border border-zinc-700 px-3 py-1 text-xs font-mono text-zinc-300 hover:bg-zinc-700 focus:outline-none transition-colors"
-          title="Use my current location"
-          disabled={isLocating}
-        >
-          LOCATE
-        </button>
       </div>
-      <div className="p-3 bg-zinc-800 border-t border-zinc-700 text-xs font-mono text-center">
+      <button 
+        onClick={handleGetCurrentLocation}
+        className="btn btn-dark my-2"
+        title="Use my current location"
+        disabled={isLocating}
+      >
+        LOCATE
+      </button>
+      <div className="p-3 bg-secondary border-top text-center">
         {locationError && (
           <div className="mb-3">
-            <p className="text-red-400 mb-1">{locationError}</p>
-            <p className="text-zinc-400 text-xs">
-              <span className="inline-block mr-1">💡</span>
+            <p className="text-danger mb-1">{locationError}</p>
+            <p className="text-muted">
+              <span className="me-1">💡</span>
               Try clicking directly on the map to select a location
             </p>
+            {isAppleDevice && (
+              <p className="text-muted small">
+                <span className="me-1">ℹ️</span>
+                Apple devices may have location accuracy issues. Try enabling Precise Location in your device settings.
+              </p>
+            )}
           </div>
         )}
         {isLocating && (
-          <p className="text-zinc-400 mb-2">
-            <span className="inline-block animate-pulse">●</span> locating...
+          <p className="text-muted mb-2">
+            <span className="spinner-grow spinner-grow-sm me-1" role="status" aria-hidden="true"></span> locating...
+            {isAppleDevice && <span className="ms-1 small">(optimized for Apple devices)</span>}
           </p>
         )}
-        <p className="text-zinc-400 truncate">
+        <p className="text-muted text-truncate">
           {selectedPosition && selectedAddress
             ? `${selectedAddress}` 
             : currentLocation 
@@ -175,8 +177,8 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelect }) => {
       </div>
     </div>
   ) : (
-    <div className="w-full h-96 flex items-center justify-center bg-zinc-800 border border-zinc-700">
-      <p className="text-zinc-500 font-mono text-xs">loading maps...</p>
+    <div className="w-100 h-96 d-flex align-items-center justify-content-center bg-secondary border">
+      <p className="text-muted">loading maps...</p>
     </div>
   );
 };
