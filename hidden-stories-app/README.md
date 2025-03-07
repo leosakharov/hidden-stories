@@ -23,7 +23,9 @@ A location-based storytelling application that generates stories and music based
 
 ## Deployment to GitHub Pages
 
-This application is configured to be deployed to GitHub Pages. Follow these steps to deploy it:
+This application is configured to be deployed to GitHub Pages. There are two ways to deploy it:
+
+### Method 1: Using gh-pages package (deploys to gh-pages branch)
 
 1. Make sure you have the gh-pages package installed:
    ```
@@ -42,7 +44,28 @@ This application is configured to be deployed to GitHub Pages. Follow these step
    - Under "Branch", select "gh-pages" and "/ (root)"
    - Click "Save"
 
-4. Your site should be available at: https://leosakharov.github.io/
+### Method 2: Deploying to the root of the repository (main branch)
+
+This method is useful for GitHub user sites (username.github.io) where the content must be in the root of the repository.
+
+1. Run the deploy-to-root.js script from the root of the repository:
+   ```
+   node deploy-to-root.js
+   ```
+
+   This script will:
+   - Build the application
+   - Copy the built files to the root of the repository
+   - Commit and push the changes to the main branch
+
+2. Configure GitHub Pages in the repository settings:
+   - Go to your GitHub repository
+   - Navigate to Settings > Pages
+   - Under "Source", select "Deploy from a branch"
+   - Under "Branch", select "main" and "/ (root)"
+   - Click "Save"
+
+Your site should be available at: https://leosakharov.github.io/
 
 ## Local Development
 
