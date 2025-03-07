@@ -12,7 +12,7 @@ export const DEFAULT_LOCATION = {
 // Map container style
 export const MAP_CONTAINER_STYLE = {
   width: '100%',
-  height: '400px'
+  height: '100vh'
 };
 
 /**

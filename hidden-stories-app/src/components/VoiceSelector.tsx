@@ -40,7 +40,7 @@ const VoiceSelector: React.FC<VoiceSelectorProps> = ({
 
   return (
     <div className="mt-2">
-      <label htmlFor="voice-selector" className="form-label text-muted">
+      <label htmlFor="voice-selector" className="form-label text-white">
         Voice:
       </label>
       <select
@@ -61,7 +61,7 @@ const VoiceSelector: React.FC<VoiceSelectorProps> = ({
         ))}
       </select>
       
-      {isLoading && <div className="text-muted mt-1">Loading voices...</div>}
+      {isLoading && <div className="text-white mt-1">Loading voices...</div>}
       {error && <div className="text-danger mt-1">{error}</div>}
     </div>
   );

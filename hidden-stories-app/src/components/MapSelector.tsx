@@ -23,7 +23,6 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelect }) => {
     error: locationError, 
     isLocating, 
     getCurrentLocation,
-    isAppleDevice,
     isUsingDefaultLocation,
     defaultAddress
   } = useGeolocation({
@@ -110,15 +109,22 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelect }) => {
   }, [selectedPosition]);
 
   return isLoaded ? (
-    <div className="w-100 overflow-hidden">
-      <div className="position-relative">
+    <div className="w-100 h-100 overflow-hidden position-absolute top-0 start-0 end-0 bottom-0">
+      <div className="position-relative h-100">
         <GoogleMap
           mapContainerStyle={MAP_CONTAINER_STYLE}
           center={selectedPosition || currentLocation || DEFAULT_LOCATION}
           zoom={10}
           onClick={onMapClick}
           options={{
-            styles: DARK_MAP_STYLES
+            styles: DARK_MAP_STYLES,
+            fullscreenControl: false,
+            mapTypeControl: false,
+            streetViewControl: false,
+            zoomControl: true,
+            zoomControlOptions: {
+              position: google.maps.ControlPosition.RIGHT_TOP
+            }
           }}
         >
           {selectedPosition && (
@@ -128,7 +134,8 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelect }) => {
                 text: "S",
                 color: "#000000",
                 fontFamily: "monospace",
-                fontSize: "10px"
+                fontSize: "12px",
+                fontWeight: "bold"
               }}
             />
           )}
@@ -139,54 +146,76 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelect }) => {
                 text: "C",
                 color: "#000000",
                 fontFamily: "monospace",
-                fontSize: "10px"
+                fontSize: "12px",
+                fontWeight: "bold"
               }}
             />
           )}
         </GoogleMap>
-      </div>
-      <button 
-        onClick={handleGetCurrentLocation}
-        className="btn btn-dark my-2"
-        title="Use my current location"
-        disabled={isLocating}
-      >
-        LOCATE
-      </button>
-      <div className="p-3 bg-secondary border-top text-center">
-        {locationError && (
-          <div className="mb-3">
-            <p className="text-danger mb-1">{locationError}</p>
-            <p className="text-muted">
-              <span className="me-1">💡</span>
-              Try clicking directly on the map to select a location
-            </p>
-            {isAppleDevice && (
-              <p className="text-muted small">
-                <span className="me-1">ℹ️</span>
-                Apple devices may have location accuracy issues. Try enabling Precise Location in your device settings.
-              </p>
+        
+        {/* Map Controls Overlay */}
+        <div className="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 p-3">
+          <div className="d-flex justify-content-between align-items-center">
+            <button 
+              onClick={handleGetCurrentLocation}
+              className="btn btn-primary"
+              title="Use my current location"
+              disabled={isLocating}
+            >
+              {isLocating ? (
+                <>
+                  <span className="spinner-grow spinner-grow-sm me-1" role="status" aria-hidden="true"></span>
+                  Locating...
+                </>
+              ) : (
+                "LOCATE ME"
+              )}
+            </button>
+            
+            <div className="text-light text-center flex-grow-1 px-3">
+              {locationError ? (
+                <p className="text-danger mb-0 small">
+                  <span className="me-1">⚠️</span>
+                  {locationError}
+                </p>
+              ) : (
+                <p className="text-light mb-0 text-truncate">
+                  {selectedPosition && selectedAddress
+                    ? `${selectedAddress}` 
+                    : currentLocation 
+                      ? `${selectedAddress || `${currentLocation.lat.toFixed(6)}, ${currentLocation.lng.toFixed(6)}`}` 
+                      : 'Click on map to select a location'}
+                </p>
+              )}
+            </div>
+            
+            {selectedPosition && (
+              <button 
+                className="btn btn-outline-light"
+                onClick={() => {
+                  setSelectedPosition(null);
+                  onLocationSelect(
+                    currentLocation?.lat || DEFAULT_LOCATION.lat,
+                    currentLocation?.lng || DEFAULT_LOCATION.lng,
+                    selectedAddress || undefined
+                  );
+                }}
+              >
+                RESET
+              </button>
             )}
           </div>
-        )}
-        {isLocating && (
-          <p className="text-muted mb-2">
-            <span className="spinner-grow spinner-grow-sm me-1" role="status" aria-hidden="true"></span> locating...
-            {isAppleDevice && <span className="ms-1 small">(optimized for Apple devices)</span>}
-          </p>
-        )}
-        <p className="text-muted text-truncate">
-          {selectedPosition && selectedAddress
-            ? `${selectedAddress}` 
-            : currentLocation 
-              ? `${selectedAddress || `${currentLocation.lat.toFixed(6)}, ${currentLocation.lng.toFixed(6)}`}` 
-              : 'click map to select location or use LOCATE button'}
-        </p>
+        </div>
       </div>
     </div>
   ) : (
-    <div className="w-100 h-96 d-flex align-items-center justify-content-center bg-secondary border">
-      <p className="text-muted">loading maps...</p>
+    <div className="w-100 h-100 d-flex align-items-center justify-content-center bg-dark">
+      <div className="text-center">
+        <div className="spinner-border text-light mb-3" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+        <p className="text-muted">Loading map...</p>
+      </div>
     </div>
   );
 };
