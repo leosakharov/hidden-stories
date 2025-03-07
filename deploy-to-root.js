@@ -46,8 +46,47 @@ files.forEach(file => {
       fs.mkdirSync(destPath, { recursive: true });
     }
     
-    // Copy the directory recursively
-    runCommand(`cp -R ${srcPath}/* ${destPath}`);
+    // Get the list of files in the source directory
+    const dirFiles = fs.readdirSync(srcPath);
+    
+    // Copy each file in the directory
+    dirFiles.forEach(dirFile => {
+      const dirFileSrcPath = path.join(srcPath, dirFile);
+      const dirFileDestPath = path.join(destPath, dirFile);
+      
+      // If the file is a directory, create it
+      if (fs.statSync(dirFileSrcPath).isDirectory()) {
+        if (!fs.existsSync(dirFileDestPath)) {
+          fs.mkdirSync(dirFileDestPath, { recursive: true });
+        }
+        
+        // Copy the directory recursively using fs methods
+        const copyDir = (src, dest) => {
+          const entries = fs.readdirSync(src, { withFileTypes: true });
+          
+          entries.forEach(entry => {
+            const srcPath = path.join(src, entry.name);
+            const destPath = path.join(dest, entry.name);
+            
+            if (entry.isDirectory()) {
+              if (!fs.existsSync(destPath)) {
+                fs.mkdirSync(destPath, { recursive: true });
+              }
+              copyDir(srcPath, destPath);
+            } else {
+              fs.copyFileSync(srcPath, destPath);
+              console.log(`Copied ${srcPath} to ${destPath}`);
+            }
+          });
+        };
+        
+        copyDir(dirFileSrcPath, dirFileDestPath);
+      } else {
+        // Copy the file
+        fs.copyFileSync(dirFileSrcPath, dirFileDestPath);
+        console.log(`Copied ${dirFileSrcPath} to ${dirFileDestPath}`);
+      }
+    });
   } else {
     // Copy the file
     fs.copyFileSync(srcPath, destPath);
