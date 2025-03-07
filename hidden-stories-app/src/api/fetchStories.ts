@@ -2,37 +2,24 @@ import axios from "axios";
 
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || "your_openai_api_key_here";
 
+// Default address for Stenhuggervej 4
+const DEFAULT_ADDRESS = "Stenhuggervej 4, Copenhagen, Denmark";
+
 export const fetchLocalStory = async (lat: number, lng: number, address?: string) => {
   try {
     console.log("OpenAI API Key:", OPENAI_API_KEY ? "Exists" : "Missing");
     console.log("Fetching local story for coordinates:", lat, lng);
-    console.log("Using OpenAI API key:", OPENAI_API_KEY.substring(0, 10) + "...");
-    
-    // If address is not provided, convert lat/lng to location name (using OpenStreetMap API)
-    let locationName = address;
-    if (!locationName) {
-      const locationResponse = await axios.get(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
-      );
-      console.log("Location response:", locationResponse.data);
-      
-      const city = locationResponse.data.address.city || 
-                   locationResponse.data.address.town || 
-                   locationResponse.data.address.village || 
-                   "this location";
-      
-      locationName = city;
-      console.log("Detected location:", locationName);
+    console.log("Address passed to fetchLocalStory:", address);
+
+    // If address is not provided, use the default address
+    let locationName = address || DEFAULT_ADDRESS;
+    if (!address) {
+      console.log("Using default address:", locationName);
     } else {
       console.log("Using provided address:", locationName);
     }
-    
-    // Comment out mock story
-    // console.log("Using mock story for testing");
-    // return `New York City's iconic Times Square was originally called Longacre Square until 1904 when The New York Times moved its headquarters there. The city's first subway line opened that same year, with a station at 42nd Street. Today, despite its name, Times Square is actually shaped more like a bowtie, formed by the intersection of Broadway and Seventh Avenue.`;
-    
-    // Use the OpenAI API to get a real story
-    console.log("Using OpenAI API to get a story");
+
+    // Debug: Log the final location name that will be used in the prompt
     const openAIResponse = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
@@ -44,7 +31,7 @@ export const fetchLocalStory = async (lat: number, lng: number, address?: string
           },
           {
             role: "user",
-            content: `Tell me an interesting, little-known, or funny historical fact about this specific address: "${address || locationName}". Focus on very local landmarks, buildings, events, or stories that happened at this exact spot or within a 200m radius. Use your internet access to find the most up-to-date and accurate information about this specific location. Include recent events or changes if relevant. Make it engaging and not too long (max 3 sentences).`,
+            content: `Tell me an interesting, little-known, or funny historical fact about this specific address: "${locationName}". Focus on very local landmarks, buildings, events, or stories that happened at this exact spot or within a 100m radius. Use your internet access to find the most up-to-date and accurate information about this specific location. Include recent events or changes if relevant. Make it engaging and not too long (max 3 sentences).`,
           },
         ],
       },

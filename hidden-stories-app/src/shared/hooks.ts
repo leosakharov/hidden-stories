@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { DEFAULT_LOCATION } from './constants';
 
 interface GeolocationState {
   position: {
@@ -16,10 +17,12 @@ interface UseGeolocationOptions {
   maximumAge?: number;
   autoLocateOnMount?: boolean;
   maxRetries?: number;
+  useDefaultLocation?: boolean;
 }
 
 /**
  * Custom hook for handling browser geolocation with improved error handling
+ * Now with option to use a default location instead of browser geolocation
  */
 export const useGeolocation = (options: UseGeolocationOptions = {}) => {
   // More precise detection of Apple devices
@@ -34,7 +37,8 @@ export const useGeolocation = (options: UseGeolocationOptions = {}) => {
     timeout = isAppleDevice ? 30000 : 10000, // Increased timeout for Apple devices
     maximumAge = isAppleDevice ? 120000 : 0, // Increased maximumAge for Apple devices
     autoLocateOnMount = true,
-    maxRetries = 2 // Limit retries to prevent infinite loops
+    maxRetries = 2, // Limit retries to prevent infinite loops
+    useDefaultLocation = true // Default to using Stenhuggervej 4 location
   } = options;
   
   // Log device detection for debugging
@@ -42,20 +46,39 @@ export const useGeolocation = (options: UseGeolocationOptions = {}) => {
     console.log(`Apple device detected (iOS: ${isIOS}, macOS: ${isMacOS}, Safari: ${isSafari}), using optimized geolocation settings`);
   }
 
+  // Initialize state with default location if useDefaultLocation is true
   const [state, setState] = useState<GeolocationState>({
-    position: null,
+    position: useDefaultLocation ? { lat: DEFAULT_LOCATION.lat, lng: DEFAULT_LOCATION.lng } : null,
     error: null,
     isLocating: false,
-    lastRequestTime: null
+    lastRequestTime: useDefaultLocation ? Date.now() : null
   });
+  
+  // Store the default address
+  const [defaultAddress] = useState<string | null>(
+    useDefaultLocation ? DEFAULT_LOCATION.address : null
+  );
   
   // Track retry attempts to prevent infinite loops
   const retryCount = useRef(0);
 
   /**
    * Get user's current location with improved error handling
+   * or return the default location if useDefaultLocation is true
    */
   const getCurrentLocation = useCallback(() => {
+    // If using default location, return it immediately
+    if (useDefaultLocation) {
+      console.log('Using default location (Stenhuggervej 4) instead of geolocation');
+      setState({
+        position: DEFAULT_LOCATION,
+        error: null,
+        isLocating: false,
+        lastRequestTime: Date.now()
+      });
+      return;
+    }
+    
     // Reset retry counter when explicitly requesting location
     retryCount.current = 0;
     
@@ -282,10 +305,12 @@ export const useGeolocation = (options: UseGeolocationOptions = {}) => {
     };
   }, [autoLocateOnMount, getCurrentLocation]);
 
-  // Provide a way to check if we're on an Apple device
+  // Provide a way to check if we're on an Apple device and if we're using the default location
   return {
     ...state,
     getCurrentLocation,
-    isAppleDevice
+    isAppleDevice,
+    isUsingDefaultLocation: useDefaultLocation,
+    defaultAddress
   };
 };

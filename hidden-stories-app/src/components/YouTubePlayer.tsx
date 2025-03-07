@@ -6,28 +6,35 @@ import React, { useState } from 'react';
 interface YouTubePlayerProps {
   /** YouTube video ID to play */
   videoId: string | null;
-  /** Theme/mood of the music */
-  theme: string;
+  /** Search query used to find the video */
+  searchQuery?: string | null;
+  /** Title of the YouTube video */
+  videoTitle?: string | null;
 }
 
 /**
  * Component that embeds a YouTube video player with audio-only option
  */
-const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ videoId, theme }) => {
+const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ videoId, searchQuery, videoTitle }) => {
   const [isAudioOnly, setIsAudioOnly] = useState(true);
 
   // If no video ID is provided, show a message
   if (!videoId) {
     return (
       <div className="mt-4 p-4 bg-secondary text-center">
-        <p className="text-muted">no music found for theme: {theme || 'unknown'}</p>
+        <p className="text-muted">no music found</p>
       </div>
     );
   }
 
   return (
     <div className="mt-4">
-      <p className="text-muted text-center mb-2">theme: {theme}</p>
+      {searchQuery && (
+        <p className="text-muted text-center mb-2">search query: "{searchQuery}"</p>
+      )}
+      {videoTitle && (
+        <p className="text-muted text-center mb-2">playing: {videoTitle}</p>
+      )}
       <div className="overflow-hidden border">
         <div className="position-relative">
           {/* YouTube iframe - hidden when in audio-only mode */}
@@ -39,7 +46,7 @@ const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ videoId, theme }) => {
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
-            className={`border-0 ${isAudioOnly ? 'opacity-0' : ''}`}
+            className={`border-0 ${isAudioOnly ? 'opacity-0' : 'opacity-100'}`}
             style={{ zIndex: 1 }}
           ></iframe>
           
@@ -47,7 +54,7 @@ const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ videoId, theme }) => {
           {isAudioOnly && (
             <div className="position-absolute top-0 start-0 end-0 bottom-0 bg-secondary d-flex align-items-center justify-content-center">
               <div className="text-center">
-                <p className="text-muted">audio playing: {theme}</p>
+                <p className="text-muted">audio playing: {videoTitle || 'music'}</p>
               </div>
             </div>
           )}

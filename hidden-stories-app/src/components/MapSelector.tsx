@@ -1,11 +1,10 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 
-// Custom hooks
-import { useGeolocation } from '../../../hooks/useGeolocation';
-
-// Utils
-import { getAddressFromCoordinates, MAP_CONTAINER_STYLE, DEFAULT_CENTER, DARK_MAP_STYLES } from '../../../utils/utils';
+// Custom hooks and utilities
+import { useGeolocation } from '../shared/hooks';
+import { getAddressFromCoordinates } from '../shared/utils';
+import { MAP_CONTAINER_STYLE, DEFAULT_LOCATION, DARK_MAP_STYLES } from '../shared/constants';
 
 interface MapSelectorProps {
   onLocationSelect: (lat: number, lng: number, address?: string) => void;
@@ -24,10 +23,13 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelect }) => {
     error: locationError, 
     isLocating, 
     getCurrentLocation,
-    isAppleDevice 
+    isAppleDevice,
+    isUsingDefaultLocation,
+    defaultAddress
   } = useGeolocation({
     autoLocateOnMount: true,
-    maxRetries: 2
+    maxRetries: 2,
+    useDefaultLocation: true // Use Stenhuggervej 4 as default location
   });
   
   // Initialize Google Maps with API key from environment variables
@@ -39,17 +41,23 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelect }) => {
   // Get address when current location changes
   useEffect(() => {
     const fetchAddress = async () => {
-      if (currentLocation) {
-        const address = await getAddressFromCoordinates(
-          currentLocation.lat, 
-          currentLocation.lng
-        );
-        setSelectedAddress(address);
+      if (currentLocation && isLoaded) {
+        // If using default location, use the default address
+        if (isUsingDefaultLocation && defaultAddress) {
+          setSelectedAddress(defaultAddress);
+        } else {
+          // Otherwise, get address from coordinates
+          const address = await getAddressFromCoordinates(
+            currentLocation.lat, 
+            currentLocation.lng
+          );
+          setSelectedAddress(address);
+        }
       }
     };
     
     fetchAddress();
-  }, [currentLocation]);
+  }, [currentLocation, isLoaded, isUsingDefaultLocation, defaultAddress]);
 
   // Handle map click
   const onMapClick = useCallback(async (e: google.maps.MapMouseEvent) => {
@@ -106,7 +114,7 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelect }) => {
       <div className="position-relative">
         <GoogleMap
           mapContainerStyle={MAP_CONTAINER_STYLE}
-          center={selectedPosition || currentLocation || DEFAULT_CENTER}
+          center={selectedPosition || currentLocation || DEFAULT_LOCATION}
           zoom={10}
           onClick={onMapClick}
           options={{

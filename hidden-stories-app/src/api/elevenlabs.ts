@@ -71,6 +71,31 @@ export const textToSpeech = async (
 };
 
 /**
+ * Play audio with error handling
+ * @param audioBlob The audio blob to play
+ */
+export const playAudio = async (audioBlob: Blob) => {
+  const audioUrl = URL.createObjectURL(audioBlob);
+  const audio = new Audio(audioUrl);
+
+  try {
+    await audio.play();
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.warn('Audio play was interrupted, retrying...');
+      // Retry playing the audio
+      setTimeout(() => {
+        audio.play().catch((retryError) => {
+          console.error('Retrying audio play failed:', retryError);
+        });
+      }, 100);
+    } else {
+      console.error('Error playing audio:', error);
+    }
+  }
+};
+
+/**
  * Get available voices from the ElevenLabs API
  * @returns A Promise that resolves to an array of Voice objects
  */

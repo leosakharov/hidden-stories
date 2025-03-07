@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Voice } from '../../../api/elevenlabs';
-import { getAllVoices, popularVoices } from '../../../utils/elevenlabsUtils';
+import { Voice } from '../api/elevenlabs';
+import { getAllVoices, popularVoices } from '../shared/utils';
 
 interface VoiceSelectorProps {
   onVoiceSelect: (voiceId: string) => void;

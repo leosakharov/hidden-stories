@@ -1,38 +1,18 @@
 /**
- * Utility functions for geocoding operations
+ * Application constants
  */
 
-/**
- * Get address from coordinates using Google Maps Geocoding API
- * @param lat - Latitude coordinate
- * @param lng - Longitude coordinate
- * @returns Promise with formatted address or null
- */
-export const getAddressFromCoordinates = async (
-  lat: number, 
-  lng: number
-): Promise<string | null> => {
-  try {
-    if (!window.google || !window.google.maps) return null;
-    
-    const geocoder = new window.google.maps.Geocoder();
-    const response = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
-      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-        if (status === "OK" && results && results.length > 0) {
-          resolve(results);
-        } else {
-          reject(status);
-        }
-      });
-    });
-    
-    // Get the most detailed address
-    const address = response[0]?.formatted_address;
-    return address || null;
-  } catch (error) {
-    console.error("Error getting address:", error);
-    return null;
-  }
+// Default location for Stenhuggervej 4, Copenhagen
+export const DEFAULT_LOCATION = {
+  lat: 55.7046,
+  lng: 12.5830,
+  address: "Stenhuggervej 4, Copenhagen, Denmark"
+};
+
+// Map container style
+export const MAP_CONTAINER_STYLE = {
+  width: '100%',
+  height: '400px'
 };
 
 /**
@@ -136,19 +116,3 @@ export const DARK_MAP_STYLES = [
     "stylers": [{"color": "#3d3d3d"}]
   }
 ];
-
-/**
- * Map container style
- */
-export const MAP_CONTAINER_STYLE = {
-  width: '100%',
-  height: '400px'
-};
-
-/**
- * Default center location (New York City)
- */
-export const DEFAULT_CENTER = {
-  lat: 40.7128,
-  lng: -74.0060
-};

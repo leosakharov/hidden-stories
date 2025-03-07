@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { textToSpeech } from '../../../api/elevenlabs';
+import { textToSpeech } from '../api/elevenlabs';
 import VoiceSelector from './VoiceSelector';
-import { popularVoices } from '../../../utils/elevenlabsUtils';
+import { popularVoices } from '../shared/utils';
 
 /**
  * Props for the StoryReader component
@@ -68,8 +68,13 @@ const StoryReader: React.FC<StoryReaderProps> = ({ story, autoPlay = false }) =>
     
     // If we already have audio and the voice hasn't changed, just play it
     if (audioUrl && audioRef.current) {
-      audioRef.current.play();
-      setIsPlaying(true);
+      try {
+        await playAudioWithRetry(audioRef.current);
+        setIsPlaying(true);
+      } catch (err: unknown) {
+        console.error('Error playing existing audio:', err);
+        setError('Failed to play audio. Please try again.');
+      }
       return;
     }
     
@@ -89,14 +94,47 @@ const StoryReader: React.FC<StoryReaderProps> = ({ story, autoPlay = false }) =>
       // Play the audio
       if (audioRef.current) {
         audioRef.current.src = url;
-        audioRef.current.play();
-        setIsPlaying(true);
+        
+        // Make sure the audio is loaded before playing
+        audioRef.current.load();
+        
+        try {
+          await playAudioWithRetry(audioRef.current);
+          setIsPlaying(true);
+        } catch (err: unknown) {
+          console.error('Error playing new audio:', err);
+          setError('Failed to play audio. Please try again.');
+        }
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error generating speech:', err);
       setError('Failed to generate speech. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  /**
+   * Play audio with retry mechanism for AbortError
+   */
+  const playAudioWithRetry = async (audio: HTMLAudioElement, retries = 3): Promise<void> => {
+    try {
+      await audio.play();
+    } catch (error: unknown) {
+      // Type guard to check if error is an object with a name property
+      if (
+        error && 
+        typeof error === 'object' && 
+        'name' in error && 
+        error.name === 'AbortError' && 
+        retries > 0
+      ) {
+        console.warn('Audio play was interrupted, retrying...', retries, 'attempts left');
+        // Wait a bit before retrying
+        await new Promise(resolve => setTimeout(resolve, 300));
+        return playAudioWithRetry(audio, retries - 1);
+      }
+      throw error;
     }
   };
 

@@ -1,4 +1,52 @@
+/**
+ * Utility functions for the application
+ */
+
 import { Voice, getVoices } from '../api/elevenlabs';
+
+// ===== Geocoding Utilities =====
+
+/**
+ * Get address from coordinates using Google Maps Geocoding API
+ * @param lat - Latitude coordinate
+ * @param lng - Longitude coordinate
+ * @param isLoaded - Boolean indicating if the Google Maps API is loaded (optional)
+ * @returns Promise with formatted address or null
+ */
+export const getAddressFromCoordinates = async (
+  lat: number, 
+  lng: number,
+  isLoaded?: boolean
+): Promise<string | null> => {
+  try {
+    // Check if Google Maps API is loaded
+    if (isLoaded === false) {
+      throw new Error("Google Maps API not loaded");
+    }
+    
+    if (!window.google || !window.google.maps) return null;
+    
+    const geocoder = new google.maps.Geocoder();
+    const response = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
+      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+        if (status === "OK" && results && results.length > 0) {
+          resolve(results);
+        } else {
+          reject(status);
+        }
+      });
+    });
+    
+    // Get the most detailed address
+    const address = response[0]?.formatted_address;
+    return address || null;
+  } catch (error) {
+    console.error("Error getting address:", error);
+    return null;
+  }
+};
+
+// ===== ElevenLabs Utilities =====
 
 /**
  * Cache for voices to avoid unnecessary API calls
