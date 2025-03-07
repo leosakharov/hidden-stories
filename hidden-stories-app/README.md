@@ -42,7 +42,7 @@ This application is configured to be deployed to GitHub Pages. Follow these step
    - Under "Branch", select "gh-pages" and "/ (root)"
    - Click "Save"
 
-4. Your site should be available at: https://leosakharov.github.io/Hidden-Stories/
+4. Your site should be available at: https://leosakharov.github.io/
 
 ## Local Development
 
