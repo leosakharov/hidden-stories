@@ -1,0 +1,15 @@
+@font-face {
+  font-family: '_WaldenburgHF_854f3f';
+  src: url('./WaldenburgHF_854f3f.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: '_WaldenburgHF_Fallback_854f3f';
+  src: url('./WaldenburgHF_Fallback_854f3f.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
